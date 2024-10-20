@@ -1,0 +1,115 @@
+import React from "react";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Container,
+  Box,
+  Grid,
+  Paper,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
+const DoctorDashboard = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    console.log("Doctor logged out");
+    navigate("/login"); // Redirect to login page
+  };
+
+  // Sample doctor profile data
+  const doctorProfile = {
+    name: "Dr. John Doe",
+    specialty: "Cardiology",
+    contact: "07123 456789",
+    email: "dr.johndoe@clinic.com",
+    qualifications: "MBBS, MD",
+    experience: "10 years",
+    nextAppointment: "12/12/2024",
+  };
+
+  return (
+    <div>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" style={{ flexGrow: 1 }}>
+            Doctor Dashboard
+          </Typography>
+          <Button color="inherit" onClick={handleLogout}>
+            Logout
+          </Button>
+        </Toolbar>
+      </AppBar>
+
+      <Container style={{ marginTop: "20px", marginBottom: "20px" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            backgroundColor: "#1976d2",
+            color: "#fff",
+            padding: "20px",
+            borderRadius: "10px",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+            marginBottom: "30px",
+          }}
+        >
+          <Typography variant="h5">Doctor Profile</Typography>
+          <Button variant="contained" sx={{ backgroundColor: "#ff9800" }}>
+            Manage Appointments
+          </Button>
+        </Box>
+
+        <Grid container spacing={4}>
+          <Grid item xs={12} sm={6} md={4}>
+            <Paper
+              sx={{
+                padding: "20px",
+                borderRadius: "12px",
+                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <Typography variant="h6">{doctorProfile.name}</Typography>
+              <Typography variant="body2" color="textSecondary">
+                Specialty: {doctorProfile.specialty}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Experience: {doctorProfile.experience}
+              </Typography>
+              <Typography variant="body1">Contact Details:</Typography>
+              <Typography variant="body2">{doctorProfile.contact}</Typography>
+              <Typography variant="body2">{doctorProfile.email}</Typography>
+              <Typography variant="body2">
+                Qualifications: {doctorProfile.qualifications}
+              </Typography>
+              <Typography variant="body2">
+                Next Appointment: {doctorProfile.nextAppointment}
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={6} md={8}>
+            <Paper
+              sx={{
+                padding: "20px",
+                borderRadius: "12px",
+                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <Typography variant="h6" gutterBottom>
+                Upcoming Appointments
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                You have no upcoming appointments.
+              </Typography>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Container>
+    </div>
+  );
+};
+
+export default DoctorDashboard;
