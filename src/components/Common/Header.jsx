@@ -5,24 +5,27 @@ import {
   IconButton,
   TextField,
   Typography,
-} from "@mui/material";
+  Box, // <--- NEW LINE: Import Box component
+} from "@mui/material"; // <--- CHANGED LINE: Box is now imported
 import { Link, useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import LoginIcon from "@mui/icons-material/Login";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
+import HospitalLogo from '../../assets/img/pngtree-hospital-logo-icon-abstract-alliance-picture-image_8313149.png'; // Your logo import
 
-const Header = ({ isAuthenticated, setIsAuthenticated, userProfile }) => {
+
+// Receive handleLogout as a prop from App.js
+const Header = ({ isAuthenticated, userProfile, handleLogout }) => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // Clear user session or token here if applicable
-    setIsAuthenticated(false);
-    // Redirect to login page
-    navigate("/login");
+  const onLogoutClick = () => {
+    handleLogout(); // Call the central logout function from App.js
+    navigate('/login'); // Redirect to login page after logout
   };
 
+  // Determine the correct dashboard path based on user role
   const profilePath =
     userProfile?.role === "doctor" ? "/doctor-dashboard" : "/user-dashboard";
 
@@ -31,18 +34,32 @@ const Header = ({ isAuthenticated, setIsAuthenticated, userProfile }) => {
       <Toolbar>
         <Typography
           variant="h6"
-          component={Link} // Use the Link component to make it clickable
-          to="/" // Set the path to the home page
+          component={Link}
+          to="/"
           style={{
             flexGrow: 1,
-            fontWeight: "bold", // Makes the text bold
-            fontFamily: "Roboto, sans-serif", // You can change this to any font you prefer
-            textTransform: "uppercase", // Makes text uppercase (optional)
-            letterSpacing: "1px", // Adds letter spacing (optional)
-            color: "inherit", // Ensure the link inherits the text color from the AppBar
-            textDecoration: "none", // Remove underline from the link
+            fontWeight: "bold",
+            fontFamily: "Roboto, sans-serif",
+            textTransform: "uppercase",
+            letterSpacing: "1px",
+            color: "inherit",
+            textDecoration: "none",
+            display: "flex",
+            alignItems: "center",
           }}
         >
+          {/* Logo integration */}
+          <Box
+            component="img"
+            src={HospitalLogo}
+            alt="CareConnect Logo"
+            sx={{
+              height: 30,
+              width: 30,
+              mr: 1,
+              borderRadius: '50%',
+            }}
+          />
           CareConnect
         </Typography>
 
@@ -58,6 +75,7 @@ const Header = ({ isAuthenticated, setIsAuthenticated, userProfile }) => {
               <HomeIcon />
             </IconButton>
 
+            {/* Profile/Dashboard Button */}
             <IconButton
               color="inherit"
               component={Link}
@@ -70,7 +88,7 @@ const Header = ({ isAuthenticated, setIsAuthenticated, userProfile }) => {
             {/* Logout button */}
             <IconButton
               color="inherit"
-              onClick={handleLogout}
+              onClick={onLogoutClick}
               aria-label="Logout"
             >
               <LogoutIcon />
@@ -89,7 +107,7 @@ const Header = ({ isAuthenticated, setIsAuthenticated, userProfile }) => {
           </IconButton>
         )}
 
-        {/* Search field */}
+        {/* Search field - kept original structure */}
         <TextField
           variant="outlined"
           size="small"

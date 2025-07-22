@@ -4,33 +4,43 @@ import {
   TextField,
   Typography,
   Container,
-  MenuItem,
-} from "@mui/material";
+  Box // Import Box for message display
+} from "@mui/material"; // Removed MenuItem as it's no longer needed
+import axios from 'axios'; // Import axios
 import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [age, setAge] = useState("");
-  const [address, setAddress] = useState("");
-  const [gender, setGender] = useState("");
-  const [dob, setDob] = useState("");
+  const [message, setMessage] = useState(''); // State for messages
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    // Handle registration logic here
-    console.log("Register:", {
-      name,
-      email,
-      password,
-      age,
-      address,
-      gender,
-      dob,
+    setMessage(''); // Clear previous messages
+    console.log("Attempting to register with:", {
+      name, email, password // Now only sending these three fields
     });
-    navigate("/login"); // Redirect to login after registration
+
+    try {
+      // Ensure your backend server is running on http://localhost:5000
+      const response = await axios.post('http://localhost:5000/api/auth/register', { // Calls backend register API
+        username: name, // Backend expects 'username'
+        email,
+        password,
+      });
+      setMessage(response.data.message); // Expects 'message' from backend
+      navigate("/login"); // Redirect to login after successful registration
+
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.error) { // Cites backend error handling
+        setMessage(error.response.data.error); // Display specific error from backend
+      } else {
+        setMessage('Registration failed. Please try again. Check browser console for details.');
+        console.error('Registration error:', error);
+      }
+    }
   };
 
   return (
@@ -41,6 +51,7 @@ const RegisterPage = () => {
         Register
       </Typography>
       <form onSubmit={handleRegister}>
+        {/* Name Field */}
         <TextField
           label="Name"
           type="text"
@@ -51,6 +62,7 @@ const RegisterPage = () => {
           onChange={(e) => setName(e.target.value)}
           required
         />
+        {/* Email Field */}
         <TextField
           label="Email"
           type="email"
@@ -61,6 +73,7 @@ const RegisterPage = () => {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
+        {/* Password Field */}
         <TextField
           label="Password"
           type="password"
@@ -71,53 +84,9 @@ const RegisterPage = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <TextField
-          label="Age"
-          type="number"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={age}
-          onChange={(e) => setAge(e.target.value)}
-          required
-        />
-        <TextField
-          label="Address"
-          type="text"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          required
-        />
-        <TextField
-          label="Gender"
-          select
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={gender}
-          onChange={(e) => setGender(e.target.value)}
-          required
-        >
-          <MenuItem value="Male">Male</MenuItem>
-          <MenuItem value="Female">Female</MenuItem>
-          <MenuItem value="Other">Other</MenuItem>
-        </TextField>
-        <TextField
-          label="Date of Birth"
-          type="date"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={dob}
-          onChange={(e) => setDob(e.target.value)}
-          InputLabelProps={{
-            shrink: true,
-          }}
-          required
-        />
+        {/* Removed Age, Address, Gender, DOB fields */}
+        
+        {/* Register Button */}
         <Button
           type="submit"
           variant="contained"
@@ -128,6 +97,12 @@ const RegisterPage = () => {
           Register
         </Button>
       </form>
+      {/* Display messages to the user */}
+      {message && (
+        <Typography variant="body2" color={message.includes('successful') ? 'success.main' : 'error.main'} sx={{ mt: 1 }}>
+          {message}
+        </Typography>
+      )}
     </Container>
   );
 };

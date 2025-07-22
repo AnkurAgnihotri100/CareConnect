@@ -6,7 +6,7 @@ const bcrypt = require("bcryptjs");
 // User schema definition
 const userSchema = new mongoose.Schema(
   {
-    username: {
+    username: { // Corresponds to 'name' from frontend
       type: String,
       required: true,
       unique: true,
@@ -17,16 +17,19 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
+      lowercase: true, // Store emails in lowercase for consistency
     },
     password: {
       type: String,
       required: true,
+      minlength: 6, // Add a minimum length for password for basic security
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "doctor", "admin"],
       default: "user",
     },
+    // Removed age, address, gender, dob fields from schema
   },
   {
     timestamps: true, // Automatically manage createdAt and updatedAt fields
@@ -43,8 +46,8 @@ userSchema.pre("save", async function (next) {
 });
 
 // Method to compare passwords
-userSchema.methods.comparePassword = async function (password) {
-  return await bcrypt.compare(password, this.password);
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
 const User = mongoose.model("User", userSchema);

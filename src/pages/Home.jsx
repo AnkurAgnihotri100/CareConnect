@@ -113,27 +113,7 @@ const Home = ({ isAuthenticated, userProfile }) => {
         )}
 
         {/* Location Search Bar */}
-        <Container style={{ marginTop: "20px" }}>
-          <Typography variant="h6" gutterBottom>
-            Find healthcare services near you:
-          </Typography>
-          <Grid container justifyContent="center" spacing={2}>
-            <Grid item xs={8} sm={6} md={4}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                label="Enter your location"
-                value={location}
-                onChange={handleLocationChange}
-              />
-            </Grid>
-            <Grid item>
-              <Button variant="contained" color="primary">
-                Search
-              </Button>
-            </Grid>
-          </Grid>
-        </Container>
+        
       </Container>
 
       <Container style={{ marginTop: "40px" }}>
