@@ -2,7 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv"); // Import dotenv to load environment variables
 const connectDB = require("./config/db"); // Import the DB connection function
 const cors = require('cors'); // Import cors middleware (install it if you haven't)
-
+const aiRoutes = require("./routes/aiRoutes");
 // Load environment variables from .env file
 dotenv.config();
 
@@ -31,6 +31,12 @@ app.use("/api/auth", authRoutes); // All auth-related routes will be prefixed wi
 // app.use("/api/doctors", doctorRoutes);
 // const appointmentRoutes = require("./routes/appointmentRoutes");
 // app.use("/api/appointments", appointmentRoutes);
+
+
+
+// AI Assistant Routes (add this block)
+app.use("/api/ai", aiRoutes); // <--- Ensure this line is present
+
 
 // Start the server
 app.listen(PORT, () => {

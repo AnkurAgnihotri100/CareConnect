@@ -1,115 +1,205 @@
-import React from "react";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Container,
-  Box,
-  Grid,
-  Paper,
-} from "@mui/material";
-import { useNavigate } from "react-router-dom";
+// src/components/Dashboard/Dashboard.js
+import React, { useState, useEffect } from 'react';
+import { Calendar, Heart, MessageCircle, Bell, User, Activity } from 'lucide-react';
+import './Dashboard.css';
 
-const DoctorDashboard = () => {
-  const navigate = useNavigate();
+const Dashboard = ({ user }) => {
+  const [appointments, setAppointments] = useState([]);
+  const [healthMetrics, setHealthMetrics] = useState({});
+  const [notifications, setNotifications] = useState([]);
 
-  const handleLogout = () => {
-    console.log("Doctor logged out");
-    navigate("/login"); // Redirect to login page
+  useEffect(() => {
+    // Fetch user data on component mount
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      // Replace with your API endpoints
+      const appointmentsResponse = await fetch(`/api/appointments/${user.id}`);
+      const metricsResponse = await fetch(`/api/health-metrics/${user.id}`);
+      const notificationsResponse = await fetch(`/api/notifications/${user.id}`);
+      
+      setAppointments(await appointmentsResponse.json());
+      setHealthMetrics(await metricsResponse.json());
+      setNotifications(await notificationsResponse.json());
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
   };
 
-  // Sample doctor profile data
-  const doctorProfile = {
-    name: "Dr. John Doe",
-    specialty: "Cardiology",
-    contact: "07123 456789",
-    email: "dr.johndoe@clinic.com",
-    qualifications: "MBBS, MD",
-    experience: "10 years",
-    nextAppointment: "12/12/2024",
+  const getNextAppointment = () => {
+    const upcoming = appointments
+      .filter(apt => new Date(apt.date) > new Date())
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+    return upcoming[0];
   };
+
+  const getBMIStatus = (bmi) => {
+    if (bmi < 18.5) return { status: 'Underweight', color: '#3b82f6' };
+    if (bmi < 25) return { status: 'Normal', color: '#10b981' };
+    if (bmi < 30) return { status: 'Overweight', color: '#f59e0b' };
+    return { status: 'Obese', color: '#ef4444' };
+  };
+
+  const nextAppointment = getNextAppointment();
+  const bmiInfo = healthMetrics.bmi ? getBMIStatus(healthMetrics.bmi) : null;
 
   return (
-    <div>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" style={{ flexGrow: 1 }}>
-            Doctor Dashboard
-          </Typography>
-          <Button color="inherit" onClick={handleLogout}>
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
+    <div className="dashboard">
+      <div className="dashboard-header">
+        <h1>Welcome back, {user.name}!</h1>
+        <p>Here's your health overview for today</p>
+      </div>
 
-      <Container style={{ marginTop: "20px", marginBottom: "20px" }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            backgroundColor: "#1976d2",
-            color: "#fff",
-            padding: "20px",
-            borderRadius: "10px",
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-            marginBottom: "30px",
-          }}
-        >
-          <Typography variant="h5">Doctor Profile</Typography>
-          <Button variant="contained" sx={{ backgroundColor: "#ff9800" }}>
-            Manage Appointments
-          </Button>
-        </Box>
+      <div className="dashboard-grid">
+        {/* Quick Stats */}
+        <div className="dashboard-card stats-card">
+          <h3>Health Overview</h3>
+          <div className="stats-grid">
+            <div className="stat-item">
+              <Activity className="stat-icon" />
+              <div>
+                <span className="stat-value">{healthMetrics.bmi || 'N/A'}</span>
+                <span className="stat-label">BMI</span>
+                {bmiInfo && (
+                  <span 
+                    className="stat-status" 
+                    style={{ color: bmiInfo.color }}
+                  >
+                    {bmiInfo.status}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="stat-item">
+              <Heart className="stat-icon" />
+              <div>
+                <span className="stat-value">{healthMetrics.heartRate || 'N/A'}</span>
+                <span className="stat-label">Heart Rate</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <Grid container spacing={4}>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper
-              sx={{
-                padding: "20px",
-                borderRadius: "12px",
-                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              <Typography variant="h6">{doctorProfile.name}</Typography>
-              <Typography variant="body2" color="textSecondary">
-                Specialty: {doctorProfile.specialty}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Experience: {doctorProfile.experience}
-              </Typography>
-              <Typography variant="body1">Contact Details:</Typography>
-              <Typography variant="body2">{doctorProfile.contact}</Typography>
-              <Typography variant="body2">{doctorProfile.email}</Typography>
-              <Typography variant="body2">
-                Qualifications: {doctorProfile.qualifications}
-              </Typography>
-              <Typography variant="body2">
-                Next Appointment: {doctorProfile.nextAppointment}
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={8}>
-            <Paper
-              sx={{
-                padding: "20px",
-                borderRadius: "12px",
-                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              <Typography variant="h6" gutterBottom>
-                Upcoming Appointments
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                You have no upcoming appointments.
-              </Typography>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Container>
+        {/* Next Appointment */}
+        <div className="dashboard-card appointment-card">
+          <h3>
+            <Calendar className="card-icon" />
+            Next Appointment
+          </h3>
+          {nextAppointment ? (
+            <div className="appointment-info">
+              <div className="appointment-date">
+                {new Date(nextAppointment.date).toLocaleDateString()}
+              </div>
+              <div className="appointment-time">
+                {nextAppointment.time}
+              </div>
+              <div className="appointment-doctor">
+                Dr. {nextAppointment.doctorName}
+              </div>
+              <div className="appointment-type">
+                {nextAppointment.type}
+              </div>
+            </div>
+          ) : (
+            <div className="no-appointment">
+              <p>No upcoming appointments</p>
+              <button className="btn-primary">Book Appointment</button>
+            </div>
+          )}
+        </div>
+
+        {/* Notifications */}
+        <div className="dashboard-card notifications-card">
+          <h3>
+            <Bell className="card-icon" />
+            Recent Notifications
+          </h3>
+          <div className="notifications-list">
+            {notifications.length > 0 ? (
+              notifications.slice(0, 3).map((notification, index) => (
+                <div key={index} className="notification-item">
+                  <div className="notification-icon">
+                    {notification.type === 'medication' && '💊'}
+                    {notification.type === 'appointment' && '📅'}
+                    {notification.type === 'health' && '❤️'}
+                  </div>
+                  <div className="notification-content">
+                    <p>{notification.message}</p>
+                    <span className="notification-time">
+                      {new Date(notification.time).toLocaleTimeString()}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p>No recent notifications</p>
+            )}
+          </div>
+        </div>
+
+        {/* AI Chat Widget */}
+        <div className="dashboard-card chat-card">
+          <h3>
+            <MessageCircle className="card-icon" />
+            Health Assistant
+          </h3>
+          <div className="chat-preview">
+            <p>Ask me anything about your health, medications, or appointments!</p>
+            <button className="btn-secondary">Start Chat</button>
+          </div>
+        </div>
+
+        {/* Recent Records */}
+        <div className="dashboard-card records-card">
+          <h3>
+            <User className="card-icon" />
+            Recent Health Records
+          </h3>
+          <div className="records-list">
+            {healthMetrics.recentRecords ? (
+              healthMetrics.recentRecords.map((record, index) => (
+                <div key={index} className="record-item">
+                  <span className="record-date">
+                    {new Date(record.date).toLocaleDateString()}
+                  </span>
+                  <span className="record-type">{record.type}</span>
+                  <span className="record-value">{record.value}</span>
+                </div>
+              ))
+            ) : (
+              <p>No recent records</p>
+            )}
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="dashboard-card actions-card">
+          <h3>Quick Actions</h3>
+          <div className="actions-grid">
+            <button className="action-btn">
+              <Calendar size={20} />
+              Book Appointment
+            </button>
+            <button className="action-btn">
+              <Activity size={20} />
+              Update BMI
+            </button>
+            <button className="action-btn">
+              <Heart size={20} />
+              Add Health Record
+            </button>
+            <button className="action-btn">
+              <MessageCircle size={20} />
+              Contact Doctor
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default DoctorDashboard;
+export default Dashboard;

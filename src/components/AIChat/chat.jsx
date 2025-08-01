@@ -1,136 +1,154 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Container,
-  Typography,
   TextField,
-  List,
-  ListItem,
+  Button,
+  Typography,
   Box,
+  Paper,
+  CircularProgress,
 } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send"; // Import Material UI Send icon
-import IconButton from "@mui/material/IconButton"; // Import IconButton for the logo
+import SendIcon from "@mui/icons-material/Send";
+import axios from 'axios'; // Import axios
 
-const Chat = () => {
-  const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState("");
+const AIChat = () => {
+  const [messages, setMessages] = useState([]); // Stores chat history: [{ type: 'user'/'ai', text: '...' }]
+  const [input, setInput] = useState(""); // Stores current user input
+  const [loading, setLoading] = useState(false); // Loading state for AI response
+  const [error, setError] = useState(''); // Error message state
+  const messagesEndRef = useRef(null); // Ref for auto-scrolling to bottom
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim()) {
-      const userMessage = inputMessage;
+  // Scroll to the bottom of the chat window whenever messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (input.trim() === "") return;
+
+    const userMessage = { type: "user", text: input };
+    setMessages((prevMessages) => [...prevMessages, userMessage]); // Add user message to chat
+    setInput(""); // Clear input field
+    setError(''); // Clear previous errors
+    setLoading(true); // Show loading indicator
+
+    try {
+      // Make a POST request to your backend's AI chat endpoint
+      // Ensure your backend server is running on http://localhost:5000
+      const response = await axios.post('http://localhost:5000/api/ai/chat', { // Calls backend AI endpoint
+        query: userMessage.text, // Send the user's query
+      });
+
+      const aiResponseText = response.data.response; // Extract AI response from backend
+      const aiMessage = { type: "ai", text: aiResponseText };
+      setMessages((prevMessages) => [...prevMessages, aiMessage]); // Add AI message to chat
+
+    } catch (err) {
+      console.error("Error sending query to AI backend:", err.response ? err.response.data : err.message);
+      setError('Failed to get AI response. Please try again.');
       setMessages((prevMessages) => [
         ...prevMessages,
-        { text: userMessage, sender: "user" },
+        { type: "ai", text: "Sorry, I couldn't process that. Please try again or rephrase." },
       ]);
-      setInputMessage(""); // Clear the input field after sending
-
-      // Simulate AI response based on predefined queries
-      const aiResponse = getAIResponse(userMessage);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { text: aiResponse, sender: "ai" },
-      ]);
+    } finally {
+      setLoading(false); // Hide loading indicator
     }
   };
 
-  const getAIResponse = (message) => {
-    const responses = {
-      "What are the symptoms of flu?":
-        "Common symptoms of flu include fever, cough, sore throat, body aches, and fatigue.",
-      "How can I book an appointment?":
-        "You can book an appointment by visiting our 'Appointments' section on the website.",
-      "What should I do if I have a headache?":
-        "If you have a headache, try resting in a dark room, stay hydrated, and consider taking over-the-counter pain relief.",
-      "What vaccines do I need?":
-        "Vaccines vary based on age and health conditions. Please consult your healthcare provider for personalized recommendations.",
-      "Can you help me with my medications?":
-        "Yes, I can provide information about medications. Please tell me the name of your medication.",
-      "": "I'm here to help! What would you like to know?",
-    };
-
-    return responses[message] || responses[""];
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !loading) {
+      handleSend();
+    }
   };
 
   return (
-    <Container
-      style={{
-        padding: "20px",
-        backgroundColor: "#ffffff",
-        borderRadius: "8px",
-        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-        maxWidth: "50%",
-        position: "relative",
-      }}
-    >
-      <Box
-        style={{
-          backgroundColor: "#1976d2",
-          padding: "10px",
-          borderRadius: "8px 8px 0 0",
-          color: "#fff",
-          textAlign: "center",
-        }}
-      >
-        <Typography variant="h6">Help Desk  AISupport</Typography>
-        <Typography variant="body2">
-          We typically reply in a few minutes
-        </Typography>
-      </Box>
-      <Box
-        style={{
-          maxHeight: "100 uv",
+    <Container maxWidth="md" sx={{ mt: 4, mb: 4, height: '80vh', display: 'flex', flexDirection: 'column' }}>
+      <Typography variant="h4" gutterBottom align="center" color="primary">
+        AI Health Assistant
+      </Typography>
+
+      {/* Chat Messages Display Area */}
+      <Paper
+        elevation={3}
+        sx={{
+          flexGrow: 1,
+          p: 2,
+          mb: 2,
           overflowY: "auto",
-          marginBottom: "10px",
-          padding: "10px",
-          backgroundColor: "#f5f5f5",
-          borderRadius: "0 0 8px 8px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+          bgcolor: '#e0f7fa', // Light blue background for chat
+          borderRadius: 2,
         }}
       >
-        <Typography variant="body1" style={{ margin: "5px 0" }}>
-           What can I help with today?
-        </Typography>
-        {messages.map((message, index) => (
-          <ListItem
+        {messages.length === 0 && (
+            <Typography variant="body1" color="textSecondary" align="center" sx={{ mt: 'auto', mb: 'auto' }}>
+                Type your health question below to get started!
+            </Typography>
+        )}
+        {messages.map((msg, index) => (
+          <Box
             key={index}
-            style={{
-              justifyContent:
-                message.sender === "user" ? "flex-end" : "flex-start",
-              margin: "5px 0",
+            sx={{
+              display: "flex",
+              justifyContent: msg.type === "user" ? "flex-end" : "flex-start",
             }}
           >
-            <div
-              style={{
-                backgroundColor:
-                  message.sender === "user" ? "#1976d2" : "#e0e0e0",
-                color: message.sender === "user" ? "#fff" : "#000",
-                padding: "10px",
-                borderRadius: "10px",
-                maxWidth: message.sender === "ai" ? "90%" : "80%", // Increase width for AI messages
-                boxShadow:
-                  message.sender === "user"
-                    ? "0 2px 4px rgba(0,0,0,0.2)"
-                    : "none",
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 1.5,
+                borderRadius: 2,
+                maxWidth: "70%",
+                wordBreak: "break-word",
+                bgcolor: msg.type === "user" ? "#dcf8c6" : "white", // User messages light green, AI messages white
+                color: msg.type === "user" ? "#333" : "#444",
+                boxShadow: msg.type === "user" ? '0px 1px 3px rgba(0,0,0,0.2)' : '0px 1px 3px rgba(0,0,0,0.1)',
               }}
             >
-              {message.text}
-            </div>
-          </ListItem>
+              <Typography variant="body1">{msg.text}</Typography>
+            </Paper>
+          </Box>
         ))}
-      </Box>
-      <div style={{ display: "flex", alignItems: "center" }}>
+        {loading && ( // Loading indicator for AI response
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+                <Typography variant="body2" color="textSecondary">Thinking...</Typography>
+            </Box>
+        )}
+        {error && ( // Error message display
+            <Typography variant="body2" color="error" align="center" sx={{ mt: 1 }}>
+                {error}
+            </Typography>
+        )}
+        <div ref={messagesEndRef} /> {/* Element to scroll to */}
+      </Paper>
+
+      {/* Input Field and Send Button */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <TextField
-          label="Write a message..."
+          label="Ask a health question..."
           variant="outlined"
-          value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
           fullWidth
-          style={{ marginRight: "10px" }}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={handleKeyPress}
+          disabled={loading} // Disable input while loading
+          sx={{ bgcolor: 'white', borderRadius: 1 }}
         />
-        <IconButton color="primary" onClick={handleSendMessage}>
-          <SendIcon />
-        </IconButton>
-      </div>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSend}
+          disabled={loading || input.trim() === ""} // Disable button while loading or input is empty
+          sx={{ minWidth: 'auto', p: 1.5 }} // Adjust padding for icon button
+        >
+          {loading ? <CircularProgress size={24} color="inherit" /> : <SendIcon />}
+        </Button>
+      </Box>
     </Container>
   );
 };
 
-export default Chat;
+export default AIChat;
