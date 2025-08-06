@@ -13,25 +13,18 @@ const Home = ({ isAuthenticated, userProfile }) => {
 
   const allFeatures = [
     {
-      title: "Appointments",
+      title: "Search Doctors",
       description:
-        "Effortlessly schedule, manage, and track appointments for seamless patient care.",
-      icon: "📅",
+        "Find and connect with healthcare professionals that meet your needs.",
+      icon: "👨‍⚕️",
       path: "/appointments",
     },
     {
       title: "Consultation",
       description:
-        "Consult with qualified healthcare professionals from the comfort of your home.",
+        "Consult with qualified professionals from the comfort of your home.",
       icon: "🩺",
       path: "/consultation",
-    },
-    {
-      title: "Search Doctors",
-      description:
-        "Find and connect with healthcare professionals that meet your needs.",
-      icon: "👨‍⚕️",
-      path: "/search-doctors",
     },
     {
       title: "Tests & Results",

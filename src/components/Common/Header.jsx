@@ -70,7 +70,7 @@ const Header = ({ isAuthenticated, userProfile, handleLogout }) => {
           }}
         >
           {[
-            { label: "Find Doctor", to: "/search-doctors" },
+            { label: "Find Doctor", to: "/appointments" },
             { label: "Contact Us", to: "/contact-us" },
             { label: "Blog", to: "/blog" },
           ].map((item) => (
