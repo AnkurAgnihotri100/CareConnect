@@ -5,122 +5,162 @@ import {
   IconButton,
   TextField,
   Typography,
-  Box, // <--- NEW LINE: Import Box component
-} from "@mui/material"; // <--- CHANGED LINE: Box is now imported
+  Box,
+  Avatar,
+  Button,
+} from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
-import HomeIcon from "@mui/icons-material/Home";
 import LoginIcon from "@mui/icons-material/Login";
 import SearchIcon from "@mui/icons-material/Search";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
-import HospitalLogo from '../../assets/img/pngtree-hospital-logo-icon-abstract-alliance-picture-image_8313149.png'; // Your logo import
+import HospitalLogo from "../../assets/img/pngtree-hospital-logo-icon-abstract-alliance-picture-image_8313149.png";
 
-
-// Receive handleLogout as a prop from App.js
 const Header = ({ isAuthenticated, userProfile, handleLogout }) => {
   const navigate = useNavigate();
 
   const onLogoutClick = () => {
-    handleLogout(); // Call the central logout function from App.js
-    navigate('/login'); // Redirect to login page after logout
+    handleLogout();
+    navigate("/login");
   };
 
-  // Determine the correct dashboard path based on user role
   const profilePath =
     userProfile?.role === "doctor" ? "/doctor-dashboard" : "/user-dashboard";
 
+  const extractFirstName = (nameOrEmail) => {
+    if (!nameOrEmail) return "User";
+    if (nameOrEmail.includes("@")) return nameOrEmail.split("@")[0];
+    return nameOrEmail.split(" ")[0];
+  };
+
+  const firstName = extractFirstName(userProfile?.name || userProfile?.email);
+
   return (
-    <AppBar position="static">
-      <Toolbar>
-        <Typography
-          variant="h6"
+    <AppBar position="static" sx={{ backgroundColor: "#ffffff", color: "#333" }}>
+      <Toolbar sx={{ justifyContent: "space-between", flexWrap: "wrap" }}>
+        {/* Left: Logo & Brand Name */}
+        <Box
           component={Link}
           to="/"
-          style={{
-            flexGrow: 1,
-            fontWeight: "bold",
-            fontFamily: "Roboto, sans-serif",
-            textTransform: "uppercase",
-            letterSpacing: "1px",
-            color: "inherit",
-            textDecoration: "none",
+          sx={{
             display: "flex",
             alignItems: "center",
+            textDecoration: "none",
+            color: "inherit",
           }}
         >
-          {/* Logo integration */}
           <Box
             component="img"
             src={HospitalLogo}
             alt="CareConnect Logo"
+            sx={{ height: 30, width: 30, borderRadius: "50%", mr: 1 }}
+          />
+          <Typography variant="h6" sx={{ fontWeight: "bold", letterSpacing: "1px" }}>
+            CareConnect
+          </Typography>
+        </Box>
+
+        {/* Middle: Nav Links */}
+        <Box
+          sx={{
+            display: "flex",
+            gap: 3,
+            alignItems: "center",
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
+          {[
+            { label: "Find Doctor", to: "/search-doctors" },
+            { label: "Contact Us", to: "/contact-us" },
+            { label: "Blog", to: "/blog" },
+          ].map((item) => (
+            <Button
+              key={item.to}
+              component={Link}
+              to={item.to}
+              color="inherit"
+              sx={{
+                textTransform: "none",
+                fontWeight: 500,
+                "&:hover": {
+                  fontWeight: "bold",
+                  color: "#1976d2",
+                  backgroundColor: "#e3f2fd",
+                },
+              }}
+            >
+              {item.label}
+            </Button>
+          ))}
+        </Box>
+
+        {/* Right: Search + User Controls */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexWrap: "wrap",
+            justifyContent: "flex-end",
+          }}
+        >
+          <TextField
+            variant="outlined"
+            size="small"
+            placeholder="Search..."
             sx={{
-              height: 30,
-              width: 30,
-              mr: 1,
-              borderRadius: '50%',
+              backgroundColor: "#f0f0f0",
+              borderRadius: "4px",
+              width: 180,
+              transition: "all 0.3s ease",
+              "& .MuiOutlinedInput-root": {
+                fontSize: "0.9rem",
+                "&:hover": {
+                  backgroundColor: "#e3f2fd",
+                  fontWeight: "bold",
+                  color: "#1976d2",
+                },
+              },
             }}
           />
-          CareConnect
-        </Typography>
-
-        {/* Show Home and Profile if authenticated */}
-        {isAuthenticated ? (
-          <>
-            <IconButton
-              color="inherit"
-              component={Link}
-              to="/"
-              aria-label="Home"
-            >
-              <HomeIcon />
-            </IconButton>
-
-            {/* Profile/Dashboard Button */}
-            <IconButton
-              color="inherit"
-              component={Link}
-              to={profilePath}
-              aria-label="Profile"
-            >
-              <AccountCircleIcon />
-            </IconButton>
-
-            {/* Logout button */}
-            <IconButton
-              color="inherit"
-              onClick={onLogoutClick}
-              aria-label="Logout"
-            >
-              <LogoutIcon />
-            </IconButton>
-          </>
-        ) : (
-          /* Show Login button if not authenticated */
-          <IconButton
-            color="inherit"
-            component={Link}
-            to="/login"
-            aria-label="Login"
-          >
-            <LoginIcon />
-            <Typography style={{ marginLeft: "5px" }}>Login</Typography>
+          <IconButton color="inherit">
+            <SearchIcon />
           </IconButton>
-        )}
 
-        {/* Search field - kept original structure */}
-        <TextField
-          variant="outlined"
-          size="small"
-          placeholder="Search..."
-          style={{ marginLeft: "10px", backgroundColor: "#fff" }}
-        />
-        <IconButton
-          color="inherit"
-          style={{ marginLeft: "10px" }}
-          aria-label="Search"
-        >
-          <SearchIcon />
-        </IconButton>
+          {isAuthenticated ? (
+            <>
+              <Typography variant="body1" sx={{ ml: 1, fontWeight: 500 }}>
+                {firstName}
+              </Typography>
+              <IconButton component={Link} to={profilePath}>
+                <Avatar sx={{ bgcolor: "#1976d2" }}>
+                  {firstName?.charAt(0)?.toUpperCase() || "U"}
+                </Avatar>
+              </IconButton>
+              <IconButton onClick={onLogoutClick} color="inherit">
+                <LogoutIcon />
+              </IconButton>
+            </>
+          ) : (
+            <Button
+              startIcon={<LoginIcon />}
+              component={Link}
+              to="/login"
+              variant="outlined"
+              sx={{
+                ml: 1,
+                textTransform: "none",
+                "&:hover": {
+                  fontWeight: "bold",
+                  color: "#1976d2",
+                  backgroundColor: "#e3f2fd",
+                },
+              }}
+            >
+              Login
+            </Button>
+          )}
+        </Box>
       </Toolbar>
     </AppBar>
   );

@@ -15,6 +15,7 @@ import UserDashboard from "./components/DashBoard/UserDashboard";
 import DoctorDashboard from "./components/DashBoard/DoctorDashboard";
 import MainApp from "./pages/MainApp"; // Assuming this is for appointments or general app flow
 import Consultation from "./components/Consultation/Cosultation"; // Note: Typo 'Cosultation'
+import './App.css';  // or wherever you placed the file
 
 // Simple 404 component
 const NotFound = () => (

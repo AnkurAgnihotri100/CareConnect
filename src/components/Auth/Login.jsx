@@ -53,7 +53,7 @@ const Login = ({ setIsAuthenticated, setUserProfile }) => {
       setMessage('Login successful!');
       
       // Redirect after showing success message
-      setTimeout(() => navigate('/dashboard'), 1500);
+      setTimeout(() => navigate('/'), 1500);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         setMessage(error.response.data.message);
