@@ -27,14 +27,6 @@ const Home = ({ isAuthenticated, userProfile }) => {
       path: "/consultation",
     },
     {
-      title: "Tests & Results",
-      description:
-        "View and manage your medical test results securely and efficiently.",
-      icon: "🧪",
-      path: "/tests-results",
-    },
-   
-    {
       title: "Health Tracking",
       description:
         "Monitor your health metrics and get personalized recommendations.",
